@@ -88,21 +88,33 @@
   const sections = document.querySelectorAll('section[id]');
   const navDots = document.querySelectorAll('.nav-dot');
 
-  const navObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id;
-          navDots.forEach((dot) => {
-            dot.classList.toggle('active', dot.getAttribute('href') === '#' + id);
-          });
-        }
-      });
-    },
-    { threshold: 0.3 }
-  );
+  function updateActiveNav() {
+    const atBottom = (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 10);
 
-  sections.forEach((sec) => navObserver.observe(sec));
+    if (atBottom) {
+      const lastSection = sections[sections.length - 1];
+      navDots.forEach((dot) => {
+        dot.classList.toggle('active', dot.getAttribute('href') === '#' + lastSection.id);
+      });
+      return;
+    }
+
+    const scrollY = window.scrollY + window.innerHeight / 3;
+    let currentId = '';
+
+    sections.forEach((sec) => {
+      if (sec.offsetTop <= scrollY) {
+        currentId = sec.id;
+      }
+    });
+
+    navDots.forEach((dot) => {
+      dot.classList.toggle('active', dot.getAttribute('href') === '#' + currentId);
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveNav, { passive: true });
+  updateActiveNav();
 
   /* ===== Smooth Scroll for Nav Dots ===== */
   navDots.forEach((dot) => {
